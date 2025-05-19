@@ -118,7 +118,7 @@
 
     const linkAcceso = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
     const tiempoBloqueo = 2 * 60 * 60 * 1000; // 2 horas en ms
-    const tiempoVentanaAbierta = 30 * 1000; // 30 segundos
+    const tiempoCierre = 10 * 1000; // 10 segundos
 
     function crearCliente(cliente) {
       const div = document.createElement('div');
@@ -140,13 +140,13 @@
       }
       div.appendChild(pEstado);
 
-      // Contenedor para aviso y botón
       const contenedorAvisoBoton = document.createElement('div');
       contenedorAvisoBoton.style.width = '100%';
       contenedorAvisoBoton.style.textAlign = 'center';
 
+      let spanAviso;
       if(cliente.aviso){
-        const spanAviso = document.createElement('span');
+        spanAviso = document.createElement('span');
         spanAviso.className = 'aviso';
         spanAviso.textContent = cliente.aviso;
         contenedorAvisoBoton.appendChild(spanAviso);
@@ -176,20 +176,24 @@
             return;
           }
 
-          // Guardar acceso
           localStorage.setItem(claveStorage, ahora);
 
-          // Abrir link en misma pestaña
+          // Abrir link en la misma pestaña
           window.location.href = linkAcceso;
 
-          // Cambiar botón
+          // Cambiar botón y quitar aviso
           btn.textContent = 'Conectado';
           btn.disabled = true;
-
-          // Quitar aviso si existe
           if(spanAviso) spanAviso.remove();
 
-          // Nota: El bloqueo real está en localStorage, la pestaña se recarga con location.href
+          // Cerrar o redirigir en 10 segundos
+          setTimeout(() => {
+            // Intentar cerrar la pestaña (funciona solo si fue abierta por JS)
+            //window.close();
+
+            // Alternativa: redirigir a otra página (por ejemplo, una página vacía)
+            window.location.href = "about:blank";
+          }, tiempoCierre);
         };
 
         contenedorAvisoBoton.appendChild(btn);

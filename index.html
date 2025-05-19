@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Panel de Seguridad - Clientes</title>
   <style>
     body {
@@ -30,10 +30,14 @@
       padding: 20px;
       width: 250px;
       box-shadow: 0 0 15px rgba(0, 209, 178, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .cliente h2 {
       margin-top: 0;
       color: #ffffff;
+      text-align: center;
     }
     .estado {
       font-weight: bold;
@@ -52,97 +56,158 @@
       border-radius: 5px;
       font-weight: bold;
       display: inline-block;
-      margin-right: 10px;
+      margin-bottom: 10px;
+      text-align: center;
     }
     .boton-conectar {
       background-color: #00d1b2;
       color: white;
       border: none;
-      padding: 5px 10px;
+      padding: 8px 14px;
       border-radius: 5px;
       cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      transition: background-color 0.3s ease;
     }
-    .boton-conectar:hover {
+    .boton-conectar:hover:not(:disabled) {
       background-color: #00b89c;
     }
-    #pantalla-container {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 30px;
-    }
-    #pantalla {
-      width: 80%;
-      max-width: 800px;
-      border: 3px solid #00d1b2;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 209, 178, 0.4);
+    .boton-conectar:disabled {
+      background-color: #00785a;
+      cursor: default;
     }
   </style>
 </head>
 <body>
   <h1>Panel de Monitoreo de Seguridad</h1>
   <div class="panel" id="panel-clientes">
-    <div class="cliente" id="cliente-julied">
-      <h2>Cliente: Julied</h2>
-      <p class="estado conectado">Estado: Conectado</p>
-    </div>
-    <div class="cliente" id="cliente-gabriel">
-      <h2>Cliente: Gabriel</h2>
-      <p class="estado desconectado">Estado: Desconectado</p>
-      <p>
-        <span class="aviso">⚠ Tiene 2 días para pagar</span>
-        <button class="boton-conectar" onclick="conectar('gabriel')">Conectar de nuevo</button>
-      </p>
-    </div>
-    <div class="cliente" id="cliente-jose">
-      <h2>Cliente: José Antonio</h2>
-      <p class="estado desconectado">Estado: Desconectado</p>
-      <p>
-        <span class="aviso">⚠ Tiene 2 días para pagar</span>
-        <button class="boton-conectar" onclick="conectar('jose')">Conectar de nuevo</button>
-      </p>
-    </div>
-  </div>
-
-  <div id="pantalla-container">
-    <h2>Transmisión en vivo de la pantalla...</h2>
-    <video id="pantalla" autoplay muted></video>
+    <!-- Los clientes se generan por JS -->
   </div>
 
   <script>
-    async function conectar(clienteId) {
-      const panel = document.getElementById('panel-clientes');
-      const pantallaCont = document.getElementById('pantalla-container');
-      const video = document.getElementById('pantalla');
+    const clientes = [
+      { id: 'julied', nombre: 'Julied', conectado: true, aviso: '' },
+      { id: 'gabriel', nombre: 'Gabriel', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
+      { id: 'jose', nombre: 'José Antonio', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
+      { id: 'sofia', nombre: 'Sofía', conectado: true, aviso: '' },
+      { id: 'mario', nombre: 'Mario', conectado: false, aviso: '' },
+      { id: 'valeria', nombre: 'Valeria', conectado: true, aviso: '' },
+      { id: 'carlos', nombre: 'Carlos', conectado: false, aviso: '' },
+      { id: 'ana', nombre: 'Ana', conectado: true, aviso: '' },
+      { id: 'diego', nombre: 'Diego', conectado: false, aviso: '⚠ Tiene 5 días para pagar' },
+      { id: 'marcela', nombre: 'Marcela', conectado: false, aviso: '' },
+      { id: 'luis', nombre: 'Luis', conectado: true, aviso: '' },
+      { id: 'laura', nombre: 'Laura', conectado: false, aviso: '' },
+      { id: 'pablo', nombre: 'Pablo', conectado: true, aviso: '' },
+      { id: 'andrea', nombre: 'Andrea', conectado: false, aviso: '' },
+      { id: 'fernando', nombre: 'Fernando', conectado: true, aviso: '' },
+      { id: 'clara', nombre: 'Clara', conectado: false, aviso: '' },
+      { id: 'jorge', nombre: 'Jorge', conectado: false, aviso: '⚠ Tiene 1 día para pagar' },
+      { id: 'silvia', nombre: 'Silvia', conectado: true, aviso: '' },
+      { id: 'roberto', nombre: 'Roberto', conectado: false, aviso: '' },
+      { id: 'patricia', nombre: 'Patricia', conectado: true, aviso: '' },
+      { id: 'esteban', nombre: 'Esteban', conectado: false, aviso: '' },
+      { id: 'laura2', nombre: 'Laura M.', conectado: false, aviso: '' },
+      { id: 'ricardo', nombre: 'Ricardo', conectado: true, aviso: '' },
+      { id: 'camila', nombre: 'Camila', conectado: false, aviso: '' },
+      { id: 'manuel', nombre: 'Manuel', conectado: false, aviso: '' },
+      { id: 'isabel', nombre: 'Isabel', conectado: true, aviso: '' },
+      { id: 'javier', nombre: 'Javier', conectado: false, aviso: '' },
+      { id: 'gabriela', nombre: 'Gabriela', conectado: true, aviso: '' },
+      { id: 'andres', nombre: 'Andrés', conectado: false, aviso: '' },
+      { id: 'monica', nombre: 'Mónica', conectado: true, aviso: '' },
+    ];
 
-      try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        video.srcObject = stream;
+    const linkAcceso = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
+    const tiempoBloqueo = 2 * 60 * 60 * 1000; // 2 horas en ms
+    const tiempoVentanaAbierta = 30 * 1000; // 30 segundos
 
-        panel.style.display = 'none';
-        pantallaCont.style.display = 'flex';
+    function crearCliente(cliente) {
+      const div = document.createElement('div');
+      div.className = 'cliente';
+      div.id = 'cliente-' + cliente.id;
 
-        setTimeout(() => {
-          // Detener la transmisión
-          stream.getTracks().forEach(track => track.stop());
-          video.srcObject = null;
+      const h2 = document.createElement('h2');
+      h2.textContent = `Cliente: ${cliente.nombre}`;
+      div.appendChild(h2);
 
-          pantallaCont.style.display = 'none';
-          panel.style.display = 'flex';
-
-          // Cambiar estado del cliente
-          const cliente = document.getElementById('cliente-' + clienteId);
-          cliente.querySelector('.estado').textContent = 'Estado: Conectado';
-          cliente.querySelector('.estado').classList.remove('desconectado');
-          cliente.querySelector('.estado').classList.add('conectado');
-          cliente.querySelector('p').innerHTML = '';
-        }, 20000);
-
-      } catch (err) {
-        alert('Permiso denegado o error al compartir la pantalla.');
+      const pEstado = document.createElement('p');
+      pEstado.classList.add('estado');
+      if(cliente.conectado){
+        pEstado.textContent = 'Estado: Conectado';
+        pEstado.classList.add('conectado');
+      } else {
+        pEstado.textContent = 'Estado: Desconectado';
+        pEstado.classList.add('desconectado');
       }
+      div.appendChild(pEstado);
+
+      if(cliente.aviso){
+        const pAviso = document.createElement('p');
+        const spanAviso = document.createElement('span');
+        spanAviso.className = 'aviso';
+        spanAviso.textContent = cliente.aviso;
+        pAviso.appendChild(spanAviso);
+        div.appendChild(pAviso);
+      }
+
+      if(!cliente.conectado){
+        const btn = document.createElement('button');
+        btn.className = 'boton-conectar';
+        btn.textContent = 'Conectar de nuevo';
+
+        // Comprobar si está bloqueado el botón
+        const claveStorage = 'cliente_' + cliente.id + '_ultimoAcceso';
+        const ultimoAcceso = localStorage.getItem(claveStorage);
+        if(ultimoAcceso){
+          const ahora = Date.now();
+          if(ahora - parseInt(ultimoAcceso) < tiempoBloqueo){
+            btn.textContent = 'Conectado';
+            btn.disabled = true;
+          }
+        }
+
+        btn.onclick = () => {
+          // Verificar bloqueo
+          const ultimo = localStorage.getItem(claveStorage);
+          const ahora = Date.now();
+          if(ultimo && (ahora - parseInt(ultimo) < tiempoBloqueo)){
+            alert('No se puede acceder todavía.');
+            return;
+          }
+
+          // Guardar acceso
+          localStorage.setItem(claveStorage, ahora);
+
+          // Abrir link en misma pestaña
+          window.location.href = linkAcceso;
+
+          // Cambiar botón
+          btn.textContent = 'Conectado';
+          btn.disabled = true;
+
+          // Abrir ventana temporal (porque window.location.href se cambia rápido, vamos a simular el tiempo con timeout)
+          setTimeout(() => {
+            // Para que luego de 30 segundos se pueda volver a conectar, aquí simplemente desbloqueamos el botón
+            // Pero al usar location.href, la página se recarga y esto se reinicia, así que el control real es con localStorage
+          }, tiempoVentanaAbierta);
+        };
+
+        div.appendChild(btn);
+      }
+
+      return div;
     }
+
+    function cargarClientes(){
+      const panel = document.getElementById('panel-clientes');
+      clientes.forEach(cliente => {
+        panel.appendChild(crearCliente(cliente));
+      });
+    }
+
+    cargarClientes();
   </script>
 </body>
 </html>

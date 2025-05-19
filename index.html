@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -81,9 +80,7 @@
 </head>
 <body>
   <h1>Panel de Monitoreo de Seguridad</h1>
-  <div class="panel" id="panel-clientes">
-    <!-- Los clientes se generan por JS -->
-  </div>
+  <div class="panel" id="panel-clientes"></div>
 
   <script>
     const clientes = [
@@ -143,13 +140,16 @@
       }
       div.appendChild(pEstado);
 
+      // Contenedor para aviso y botón
+      const contenedorAvisoBoton = document.createElement('div');
+      contenedorAvisoBoton.style.width = '100%';
+      contenedorAvisoBoton.style.textAlign = 'center';
+
       if(cliente.aviso){
-        const pAviso = document.createElement('p');
         const spanAviso = document.createElement('span');
         spanAviso.className = 'aviso';
         spanAviso.textContent = cliente.aviso;
-        pAviso.appendChild(spanAviso);
-        div.appendChild(pAviso);
+        contenedorAvisoBoton.appendChild(spanAviso);
       }
 
       if(!cliente.conectado){
@@ -157,7 +157,6 @@
         btn.className = 'boton-conectar';
         btn.textContent = 'Conectar de nuevo';
 
-        // Comprobar si está bloqueado el botón
         const claveStorage = 'cliente_' + cliente.id + '_ultimoAcceso';
         const ultimoAcceso = localStorage.getItem(claveStorage);
         if(ultimoAcceso){
@@ -165,11 +164,11 @@
           if(ahora - parseInt(ultimoAcceso) < tiempoBloqueo){
             btn.textContent = 'Conectado';
             btn.disabled = true;
+            if(spanAviso) spanAviso.remove();
           }
         }
 
         btn.onclick = () => {
-          // Verificar bloqueo
           const ultimo = localStorage.getItem(claveStorage);
           const ahora = Date.now();
           if(ultimo && (ahora - parseInt(ultimo) < tiempoBloqueo)){
@@ -187,15 +186,16 @@
           btn.textContent = 'Conectado';
           btn.disabled = true;
 
-          // Abrir ventana temporal (porque window.location.href se cambia rápido, vamos a simular el tiempo con timeout)
-          setTimeout(() => {
-            // Para que luego de 30 segundos se pueda volver a conectar, aquí simplemente desbloqueamos el botón
-            // Pero al usar location.href, la página se recarga y esto se reinicia, así que el control real es con localStorage
-          }, tiempoVentanaAbierta);
+          // Quitar aviso si existe
+          if(spanAviso) spanAviso.remove();
+
+          // Nota: El bloqueo real está en localStorage, la pestaña se recarga con location.href
         };
 
-        div.appendChild(btn);
+        contenedorAvisoBoton.appendChild(btn);
       }
+
+      div.appendChild(contenedorAvisoBoton);
 
       return div;
     }
@@ -211,3 +211,4 @@
   </script>
 </body>
 </html>
+

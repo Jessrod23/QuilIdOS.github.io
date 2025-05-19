@@ -118,7 +118,6 @@
 
     const linkAcceso = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
     const tiempoBloqueo = 2 * 60 * 60 * 1000; // 2 horas en ms
-    const tiempoCierre = 10 * 1000; // 10 segundos
 
     function crearCliente(cliente) {
       const div = document.createElement('div');
@@ -131,7 +130,23 @@
 
       const pEstado = document.createElement('p');
       pEstado.classList.add('estado');
-      if(cliente.conectado){
+
+      const claveStorage = 'cliente_' + cliente.id + '_ultimoAcceso';
+      const conectadoStorage = localStorage.getItem(claveStorage);
+
+      let estaConectado = cliente.conectado;
+
+      if (conectadoStorage) {
+        const ahora = Date.now();
+        if (ahora - parseInt(conectadoStorage) < tiempoBloqueo) {
+          estaConectado = true;
+        } else {
+          localStorage.removeItem(claveStorage);
+          estaConectado = false;
+        }
+      }
+
+      if (estaConectado) {
         pEstado.textContent = 'Estado: Conectado';
         pEstado.classList.add('conectado');
       } else {
@@ -144,71 +159,42 @@
       contenedorAvisoBoton.style.width = '100%';
       contenedorAvisoBoton.style.textAlign = 'center';
 
-      let spanAviso;
-      if(cliente.aviso){
-        spanAviso = document.createElement('span');
+      if (cliente.aviso && !estaConectado) {
+        const spanAviso = document.createElement('span');
         spanAviso.className = 'aviso';
         spanAviso.textContent = cliente.aviso;
         contenedorAvisoBoton.appendChild(spanAviso);
       }
 
-      if(!cliente.conectado){
-        const btn = document.createElement('button');
-        btn.className = 'boton-conectar';
+      const btn = document.createElement('button');
+      btn.className = 'boton-conectar';
+
+      if (!estaConectado) {
         btn.textContent = 'Conectar de nuevo';
 
-        const claveStorage = 'cliente_' + cliente.id + '_ultimoAcceso';
-        const ultimoAcceso = localStorage.getItem(claveStorage);
-        if(ultimoAcceso){
-          const ahora = Date.now();
-          if(ahora - parseInt(ultimoAcceso) < tiempoBloqueo){
-            btn.textContent = 'Conectado';
-            btn.disabled = true;
-            if(spanAviso) spanAviso.remove();
-          }
-        }
-
         btn.onclick = () => {
-          const ultimo = localStorage.getItem(claveStorage);
-          const ahora = Date.now();
-          if(ultimo && (ahora - parseInt(ultimo) < tiempoBloqueo)){
-            alert('No se puede acceder todavía.');
-            return;
-          }
+          // Guardar acceso para bloquear futuras conexiones
+          localStorage.setItem(claveStorage, Date.now());
 
-          localStorage.setItem(claveStorage, ahora);
+          // Abrir el link en la misma pestaña
+          window.location.href = linkAcceso;
 
-          // Abrir en nueva pestaña
-          const nuevaVentana = window.open(linkAcceso, '_blank');
-
-          // Cambiar estado en la misma pestaña
-          pEstado.textContent = 'Estado: Conectado';
-          pEstado.classList.remove('desconectado');
-          pEstado.classList.add('conectado');
-
-          // Cambiar botón y quitar aviso
-          btn.textContent = 'Conectado';
-          btn.disabled = true;
-          if(spanAviso) spanAviso.remove();
-
-          // Cerrar nueva pestaña en 10 segundos
-          setTimeout(() => {
-            if(nuevaVentana) {
-              nuevaVentana.close();
-            }
-          }, tiempoCierre);
+          // Nota: el cambio de estado y botón se verá cuando regresen a esta página
         };
-
-        contenedorAvisoBoton.appendChild(btn);
+      } else {
+        btn.textContent = 'Conectado';
+        btn.disabled = true;
       }
 
+      contenedorAvisoBoton.appendChild(btn);
       div.appendChild(contenedorAvisoBoton);
 
       return div;
     }
 
-    function cargarClientes(){
+    function cargarClientes() {
       const panel = document.getElementById('panel-clientes');
+      panel.innerHTML = '';
       clientes.forEach(cliente => {
         panel.appendChild(crearCliente(cliente));
       });
@@ -218,4 +204,5 @@
   </script>
 </body>
 </html>
+
 

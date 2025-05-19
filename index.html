@@ -178,21 +178,24 @@
 
           localStorage.setItem(claveStorage, ahora);
 
-          // Abrir link en la misma pestaña
-          window.location.href = linkAcceso;
+          // Abrir en nueva pestaña
+          const nuevaVentana = window.open(linkAcceso, '_blank');
+
+          // Cambiar estado en la misma pestaña
+          pEstado.textContent = 'Estado: Conectado';
+          pEstado.classList.remove('desconectado');
+          pEstado.classList.add('conectado');
 
           // Cambiar botón y quitar aviso
           btn.textContent = 'Conectado';
           btn.disabled = true;
           if(spanAviso) spanAviso.remove();
 
-          // Cerrar o redirigir en 10 segundos
+          // Cerrar nueva pestaña en 10 segundos
           setTimeout(() => {
-            // Intentar cerrar la pestaña (funciona solo si fue abierta por JS)
-            //window.close();
-
-            // Alternativa: redirigir a otra página (por ejemplo, una página vacía)
-            window.location.href = "about:blank";
+            if(nuevaVentana) {
+              nuevaVentana.close();
+            }
           }, tiempoCierre);
         };
 

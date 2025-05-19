@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Seguridad - Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0e1a2b;
+      color: #f1f1f1;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #00d1b2;
+    }
+    .panel {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .cliente {
+      background-color: #1e2b3c;
+      border: 2px solid #00d1b2;
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      box-shadow: 0 0 15px rgba(0, 209, 178, 0.3);
+    }
+    .cliente h2 {
+      margin-top: 0;
+      color: #ffffff;
+    }
+    .estado {
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .conectado {
+      color: #00ff88;
+    }
+    .desconectado {
+      color: #ff4e4e;
+    }
+    .aviso {
+      background-color: #ffcc00;
+      color: #000;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      display: inline-block;
+      margin-right: 10px;
+    }
+    .boton-conectar {
+      background-color: #00d1b2;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .boton-conectar:hover {
+      background-color: #00b89c;
+    }
+    #pantalla-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+    }
+    #pantalla {
+      width: 80%;
+      max-width: 800px;
+      border: 3px solid #00d1b2;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 209, 178, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <h1>Panel de Monitoreo de Seguridad</h1>
+  <div class="panel" id="panel-clientes">
+    <div class="cliente" id="cliente-julied">
+      <h2>Cliente: Julied</h2>
+      <p class="estado conectado">Estado: Conectado</p>
+    </div>
+    <div class="cliente" id="cliente-gabriel">
+      <h2>Cliente: Gabriel</h2>
+      <p class="estado desconectado">Estado: Desconectado</p>
+      <p>
+        <span class="aviso">⚠ Tiene 2 días para pagar</span>
+        <button class="boton-conectar" onclick="conectar('gabriel')">Conectar de nuevo</button>
+      </p>
+    </div>
+    <div class="cliente" id="cliente-jose">
+      <h2>Cliente: José Antonio</h2>
+      <p class="estado desconectado">Estado: Desconectado</p>
+      <p>
+        <span class="aviso">⚠ Tiene 2 días para pagar</span>
+        <button class="boton-conectar" onclick="conectar('jose')">Conectar de nuevo</button>
+      </p>
+    </div>
+  </div>
+
+  <div id="pantalla-container">
+    <h2>Transmisión en vivo de la pantalla...</h2>
+    <video id="pantalla" autoplay muted></video>
+  </div>
+
+  <script>
+    async function conectar(clienteId) {
+      const panel = document.getElementById('panel-clientes');
+      const pantallaCont = document.getElementById('pantalla-container');
+      const video = document.getElementById('pantalla');
+
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        video.srcObject = stream;
+
+        panel.style.display = 'none';
+        pantallaCont.style.display = 'flex';
+
+        setTimeout(() => {
+          // Detener la transmisión
+          stream.getTracks().forEach(track => track.stop());
+          video.srcObject = null;
+
+          pantallaCont.style.display = 'none';
+          panel.style.display = 'flex';
+
+          // Cambiar estado del cliente
+          const cliente = document.getElementById('cliente-' + clienteId);
+          cliente.querySelector('.estado').textContent = 'Estado: Conectado';
+          cliente.querySelector('.estado').classList.remove('desconectado');
+          cliente.querySelector('.estado').classList.add('conectado');
+          cliente.querySelector('p').innerHTML = '';
+        }, 20000);
+
+      } catch (err) {
+        alert('Permiso denegado o error al compartir la pantalla.');
+      }
+    }
+  </script>
+</body>
+</html>

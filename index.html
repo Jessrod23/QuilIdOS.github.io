@@ -10,17 +10,59 @@
       background-color: #0e1a2b;
       color: #f1f1f1;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+    }
+    header {
+      background-color: #122640;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-opciones {
+      position: relative;
+    }
+    .menu-opciones .puntos {
+      cursor: pointer;
+      font-size: 24px;
+    }
+    .menu-opciones ul {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: #1e2b3c;
+      border: 1px solid #00d1b2;
+      list-style: none;
+      padding: 5px;
+      margin: 0;
+      border-radius: 5px;
+    }
+    .menu-opciones:hover ul {
+      display: block;
+    }
+    .menu-opciones ul li {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .menu-opciones ul li:hover {
+      background-color: #00d1b2;
+      color: black;
+    }
+    .nombre-sistema {
+      font-weight: bold;
+      color: #00d1b2;
     }
     h1 {
       text-align: center;
+      margin-top: 20px;
       color: #00d1b2;
     }
     .panel {
       display: flex;
       justify-content: center;
-      gap: 20px;
       flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
     }
     .cliente {
       background-color: #1e2b3c;
@@ -54,11 +96,9 @@
       padding: 5px 10px;
       border-radius: 5px;
       font-weight: bold;
-      display: inline-block;
       margin-bottom: 10px;
-      text-align: center;
     }
-    .boton-conectar {
+    .boton-conectar, .boton-pagar {
       background-color: #00d1b2;
       color: white;
       border: none;
@@ -67,26 +107,57 @@
       cursor: pointer;
       font-weight: bold;
       width: 100%;
+      margin-top: 10px;
       transition: background-color 0.3s ease;
     }
-    .boton-conectar:hover:not(:disabled) {
+    .boton-conectar:hover:not(:disabled),
+    .boton-pagar:hover {
       background-color: #00b89c;
     }
     .boton-conectar:disabled {
       background-color: #00785a;
       cursor: default;
     }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #122640;
+      color: #888;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
-  <h1>Panel de Monitoreo de Seguridad</h1>
-  <div class="panel" id="panel-clientes"></div>
 
-  <script>
-    const clientes = [
+<header>
+  <div class="menu-opciones">
+    <span class="puntos">⋮</span>
+    <ul>
+      <li>Perfil</li>
+      <li>Cerrar sesión</li>
+      <li>Más</li>
+    </ul>
+  </div>
+  <div class="nombre-sistema">Dgo. jss. mgl. Rdz</div>
+</header>
+
+<h1>QuiID OS- Clientes</h1>
+<div class="panel" id="panel-clientes"></div>
+
+<footer>
+  Derechos reservados de QuiID Os
+
+
+  &copy; 2025 QuiID Os
+</footer>
+
+
+
+<script>
+  const clientes = [
       { id: 'julied', nombre: 'Julied', conectado: true, aviso: '' },
-      { id: 'gabriel', nombre: 'Gabriel', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'jose', nombre: 'José Antonio', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
+      { id: 'gabriel', nombre: 'Gabriela Gpe', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
+      { id: 'jose', nombre: 'José Antonio R.', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
       { id: 'sofia', nombre: 'Sofía', conectado: true, aviso: '' },
       { id: 'mario', nombre: 'Mario', conectado: false, aviso: '' },
       { id: 'valeria', nombre: 'Valeria', conectado: true, aviso: '' },
@@ -114,95 +185,88 @@
       { id: 'gabriela', nombre: 'Gabriela', conectado: true, aviso: '' },
       { id: 'andres', nombre: 'Andrés', conectado: false, aviso: '' },
       { id: 'monica', nombre: 'Mónica', conectado: true, aviso: '' },
-    ];
+  ];
 
-    const linkAcceso = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
-    const tiempoBloqueo = 2 * 60 * 60 * 1000; // 2 horas en ms
+  let clienteConectando = localStorage.getItem('clienteConectando');
 
-    function crearCliente(cliente) {
-      const div = document.createElement('div');
-      div.className = 'cliente';
-      div.id = 'cliente-' + cliente.id;
-
-      const h2 = document.createElement('h2');
-      h2.textContent = `Cliente: ${cliente.nombre}`;
-      div.appendChild(h2);
-
-      const pEstado = document.createElement('p');
-      pEstado.classList.add('estado');
-
-      const claveStorage = 'cliente_' + cliente.id + '_ultimoAcceso';
-      const conectadoStorage = localStorage.getItem(claveStorage);
-
-      let estaConectado = cliente.conectado;
-
-      if (conectadoStorage) {
-        const ahora = Date.now();
-        if (ahora - parseInt(conectadoStorage) < tiempoBloqueo) {
-          estaConectado = true;
-        } else {
-          localStorage.removeItem(claveStorage);
-          estaConectado = false;
-        }
-      }
-
-      if (estaConectado) {
-        pEstado.textContent = 'Estado: Conectado';
-        pEstado.classList.add('conectado');
-      } else {
-        pEstado.textContent = 'Estado: Desconectado';
-        pEstado.classList.add('desconectado');
-      }
-      div.appendChild(pEstado);
-
-      const contenedorAvisoBoton = document.createElement('div');
-      contenedorAvisoBoton.style.width = '100%';
-      contenedorAvisoBoton.style.textAlign = 'center';
-
-      if (cliente.aviso && !estaConectado) {
-        const spanAviso = document.createElement('span');
-        spanAviso.className = 'aviso';
-        spanAviso.textContent = cliente.aviso;
-        contenedorAvisoBoton.appendChild(spanAviso);
-      }
-
-      const btn = document.createElement('button');
-      btn.className = 'boton-conectar';
-
-      if (!estaConectado) {
-        btn.textContent = 'Conectar de nuevo';
-
-        btn.onclick = () => {
-          // Guardar acceso para bloquear futuras conexiones
-          localStorage.setItem(claveStorage, Date.now());
-
-          // Abrir el link en la misma pestaña
-          window.location.href = linkAcceso;
-
-          // Nota: el cambio de estado y botón se verá cuando regresen a esta página
-        };
-      } else {
-        btn.textContent = 'Conectado';
-        btn.disabled = true;
-      }
-
-      contenedorAvisoBoton.appendChild(btn);
-      div.appendChild(contenedorAvisoBoton);
-
-      return div;
-    }
-
-    function cargarClientes() {
-      const panel = document.getElementById('panel-clientes');
-      panel.innerHTML = '';
-      clientes.forEach(cliente => {
-        panel.appendChild(crearCliente(cliente));
-      });
-    }
-
+  function marcarConectado(id) {
+    const cliente = clientes.find(c => c.id === id);
+    if (!cliente) return;
+    cliente.conectado = true;
+    cliente.aviso = '';
+    localStorage.removeItem('clienteConectando');
+    localStorage.setItem('estado_' + id, 'conectado');
     cargarClientes();
-  </script>
+  }
+
+  function crearCliente(cliente) {
+    const div = document.createElement('div');
+    div.className = 'cliente';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = `Cliente: ${cliente.nombre}`;
+    div.appendChild(h2);
+
+    const estado = document.createElement('p');
+    estado.classList.add('estado');
+
+    const conectado = cliente.conectado || localStorage.getItem('estado_' + cliente.id) === 'conectado';
+    estado.textContent = conectado ? 'Estado: Conectado' : 'Estado: Desconectado';
+    estado.classList.add(conectado ? 'conectado' : 'desconectado');
+    div.appendChild(estado);
+
+    if (cliente.aviso && !conectado) {
+      const aviso = document.createElement('div');
+      aviso.className = 'aviso';
+      aviso.textContent = cliente.aviso;
+      div.appendChild(aviso);
+
+      const btnPagar = document.createElement('button');
+      btnPagar.className = 'boton-pagar';
+      btnPagar.textContent = 'Pagar';
+      btnPagar.onclick = () => {
+        alert('Cobrando a tarjeta a nombre de Diego de Jesús...');
+        aviso.remove();
+        btnPagar.remove();
+        estado.textContent = 'Estado: Dado de baja';
+        estado.className = 'estado desconectado';
+      };
+      div.appendChild(btnPagar);
+    }
+
+    const btnConectar = document.createElement('button');
+    btnConectar.className = 'boton-conectar';
+    btnConectar.textContent = conectado ? 'Conectado' : 'Conectar de nuevo';
+    btnConectar.disabled = conectado;
+    btnConectar.onclick = () => {
+      localStorage.setItem('clienteConectando', cliente.id);
+      window.location.href = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
+    };
+    div.appendChild(btnConectar);
+
+    return div;
+  }
+
+  function cargarClientes() {
+    const panel = document.getElementById('panel-clientes');
+    panel.innerHTML = '';
+    clientes.forEach(cliente => {
+      panel.appendChild(crearCliente(cliente));
+    });
+  }
+
+  window.addEventListener('load', () => {
+    if (clienteConectando) {
+      marcarConectado(clienteConectando);
+    } else {
+      cargarClientes();
+    }
+  });
+</script>
+
 </body>
 </html>
+
+
 
 

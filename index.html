@@ -1,274 +1,415 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Panel de Seguridad - Clientes</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #0e1a2b;
-      color: #f1f1f1;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #122640;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .menu-opciones {
-      position: relative;
-    }
-    .menu-opciones .puntos {
-      cursor: pointer;
-      font-size: 24px;
-    }
-    .menu-opciones ul {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: #1e2b3c;
-      border: 1px solid #00d1b2;
-      list-style: none;
-      padding: 5px;
-      margin: 0;
-      border-radius: 5px;
-    }
-    .menu-opciones:hover ul {
-      display: block;
-    }
-    .menu-opciones ul li {
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .menu-opciones ul li:hover {
-      background-color: #00d1b2;
-      color: black;
-    }
-    .nombre-sistema {
-      font-weight: bold;
-      color: #00d1b2;
-    }
-    h1 {
-      text-align: center;
-      margin-top: 20px;
-      color: #00d1b2;
-    }
-    .panel {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 20px;
-    }
-    .cliente {
-      background-color: #1e2b3c;
-      border: 2px solid #00d1b2;
-      border-radius: 10px;
-      padding: 20px;
-      width: 250px;
-      box-shadow: 0 0 15px rgba(0, 209, 178, 0.3);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .cliente h2 {
-      margin-top: 0;
-      color: #ffffff;
-      text-align: center;
-    }
-    .estado {
-      font-weight: bold;
-      margin: 10px 0;
-    }
-    .conectado {
-      color: #00ff88;
-    }
-    .desconectado {
-      color: #ff4e4e;
-    }
-    .aviso {
-      background-color: #ffcc00;
-      color: #000;
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .boton-conectar, .boton-pagar {
-      background-color: #00d1b2;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-      transition: background-color 0.3s ease;
-    }
-    .boton-conectar:hover:not(:disabled),
-    .boton-pagar:hover {
-      background-color: #00b89c;
-    }
-    .boton-conectar:disabled {
-      background-color: #00785a;
-      cursor: default;
-    }
-    footer {
-      text-align: center;
-      padding: 10px;
-      background-color: #122640;
-      color: #888;
-      font-size: 14px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector CFDI Contable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Clases personalizadas para el estado de arrastrar archivos */
+        .drag-active { 
+            border-color: #3b82f6 !important; 
+            background-color: #eff6ff !important; 
+        }
+        /* Scrollbar personalizado para la tabla */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen p-4 md:p-8 text-slate-800">
 
-<header>
-    <div class="nombre-sistema">Dgo. jss. mgl. Rdz</div>
-  
-  
-  <div class="menu-opciones">
-    <span class="puntos">⋮</span>
-    <ul>
-      <li>Perfil</li>
-      <li>Cerrar sesión</li>
-      <li>Más</li>
-    </ul>
-  </div>
+    <div class="max-w-[1400px] mx-auto space-y-6">
+        
+        <!-- Encabezado -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between bg-white p-6 rounded-2xl shadow-sm border border-slate-200 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-blue-600 p-3 rounded-xl shadow-inner text-white flex-shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Lector Inteligente CFDI</h1>
+                    <p class="text-sm text-slate-500 mt-1">Extrae y organiza información de tus facturas XML (Ingresos, Egresos, etc.)</p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="limpiarTabla()" class="text-sm font-medium text-slate-700 hover:text-red-600 transition-colors px-5 py-2.5 bg-slate-100 hover:bg-red-50 rounded-xl border border-slate-200 hover:border-red-200">
+                    Limpiar Datos
+                </button>
+                <button onclick="exportarCSV()" class="text-sm font-medium text-white transition-colors px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Exportar
+                </button>
+            </div>
+        </header>
 
-</header>
+        <!-- Zona de Carga (Drag & Drop) -->
+        <div id="dropZone" class="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center transition-all duration-200 hover:bg-slate-50 hover:border-blue-400 cursor-pointer shadow-sm relative overflow-hidden group">
+            <input type="file" id="fileInput" multiple accept=".xml" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <div class="flex flex-col items-center justify-center space-y-4 relative z-0">
+                <div class="p-4 bg-slate-100 rounded-full group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors text-slate-400">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <div>
+                    <p class="text-lg font-medium text-slate-700">Haz clic o arrastra tus archivos XML aquí</p>
+                    <p class="text-sm text-slate-500 mt-1">Soporta múltiples archivos CFDI (versiones 3.3 y 4.0)</p>
+                </div>
+            </div>
+        </div>
 
-<h1>QuiID OS- Clientes</h1>
-<div class="panel" id="panel-clientes"></div>
+        <!-- Tabla de Datos -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-xs font-semibold sticky top-0">
+                        <tr>
+                            <th class="px-4 py-4 min-w-[100px]">Fecha</th>
+                            <th class="px-4 py-4 min-w-[80px]">Tipo</th>
+                            <th class="px-4 py-4 min-w-[200px]">Cliente (Receptor)</th>
+                            <th class="px-4 py-4 min-w-[120px]">F. Pago</th>
+                            <th class="px-4 py-4 min-w-[120px]">M. Pago</th>
+                            <th class="px-4 py-4 min-w-[120px] text-right">Subtotal</th>
+                            
+                            <!-- Impuestos trasladados con sus porcentajes AL LADO -->
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-blue-50/50">IVA Traslado</th>
+                            <th class="px-4 py-4 min-w-[80px] text-center bg-blue-50/50">% IVA</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-purple-50/50">IEPS Traslado</th>
+                            <th class="px-4 py-4 min-w-[80px] text-center bg-purple-50/50">% IEPS</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right text-rose-700/80">Ret IVA</th>
+                            <th class="px-4 py-4 min-w-[120px] text-right text-rose-700/80">Ret ISR</th>
+                            
+                            <th class="px-4 py-4 min-w-[120px] text-right bg-emerald-50/50">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                        <!-- Estado vacío -->
+                        <tr id="emptyState">
+                            <td colspan="13" class="px-4 py-16 text-center">
+                                <div class="flex flex-col items-center justify-center text-slate-400">
+                                    <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <p class="text-base font-medium text-slate-500">No hay datos registrados</p>
+                                    <p class="text-sm mt-1">Sube tus archivos XML para generar la tabla</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pie de tabla / Contador -->
+            <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center text-sm text-slate-600">
+                <div class="flex items-center gap-2">
+                    <span class="relative flex h-3 w-3">
+                      <span id="statusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-0"></span>
+                      <span id="statusDot" class="relative inline-flex rounded-full h-3 w-3 bg-slate-300"></span>
+                    </span>
+                    <span id="counterText" class="font-medium">0 facturas procesadas</span>
+                </div>
+            </div>
+        </div>
 
-<footer>
-  Derechos reservados de QuiID Os
+    </div>
 
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const counterText = document.getElementById('counterText');
+        const statusPing = document.getElementById('statusPing');
+        const statusDot = document.getElementById('statusDot');
+        
+        let facturasProcesadas = 0;
 
-  &copy; 2025 QuiID Os
-</footer>
+        // Prevenir comportamientos por defecto del navegador para Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
 
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
 
+        // Efectos visuales al arrastrar
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('drag-active');
+            }, false);
+        });
 
-<script>
-  const clientes = [
-      { id: 'julied', nombre: 'Julied', conectado: true, aviso: '' },
-      { id: 'gabriel', nombre: 'Gabriela Gpe', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'sofia', nombre: 'Sofía', conectado: true, aviso: '' },
-      { id: 'mario', nombre: 'Mario',conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'valeria', nombre: 'Valeria', conectado: true, aviso: '' },
-      { id: 'carlos', nombre: 'Carlos', conectado: false, aviso: '⚠ Tiene 4 días para pagar' },
-      { id: 'ana', nombre: 'Ana', conectado: true, aviso: '' },
-      { id: 'diego', nombre: 'Diego', conectado: false, aviso: '⚠ Tiene 5 días para pagar' },
-      { id: 'marcela', nombre: 'Marcela',conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'luis', nombre: 'Luis', conectado: true, aviso: '' },
-      { id: 'elizabeth', nombre: 'elizabeth', conectado: false, aviso: '' },
-      { id: 'pablo', nombre: 'Pablo', conectado: true, aviso: '' },
-      { id: 'andrea', nombre: 'Andrea', conectado: false, aviso: '⚠ Tiene 4 días para pagar' },
-      { id: 'fernando', nombre: 'Fernando', conectado: true, aviso: '' },
-      { id: 'clara', nombre: 'Clara', conectado: false, aviso: '⚠ Tiene 7 días para pagar' },
-      { id: 'Jose antonio', nombre: 'Jose antonio', conectado: false, aviso: '⚠ Tiene 1 día para pagar' },
-      { id: 'silvia', nombre: 'Silvia', conectado: true, aviso: '' },
-      { id: 'roberto', nombre: 'Roberto', conectado: false, aviso: '⚠ Tiene 3 días para pagar' },
-      { id: 'patricia', nombre: 'Patricia', conectado: true, aviso: '' },
-      { id: 'esteban', nombre: 'Esteban', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'laura2', nombre: 'Laura M.', conectado: false, aviso: '⚠ Tiene 5 días para pagar' },
-      { id: 'ricardo', nombre: 'Ricardo', conectado: true, aviso: '' },
-      { id: 'camila', nombre: 'Camila',conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'manuel', nombre: 'Manuel', conectado: false, aviso: '⚠ Tiene 5 días para pagar' },
-      { id: 'isabel', nombre: 'Isabel', conectado: true, aviso: '' },
-      { id: 'javier', nombre: 'Javier', conectado: false, aviso: '' },
-      { id: 'gabriela', nombre: 'Gabriela', conectado: true, aviso: '' },
-      { id: 'andres', nombre: 'Andrés', conectado: false, aviso: '⚠ Tiene 2 días para pagar' },
-      { id: 'monica', nombre: 'Mónica', conectado: true, aviso: '' },
-  ];
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('drag-active');
+            }, false);
+        });
 
-  let clienteConectando = localStorage.getItem('clienteConectando');
+        // Manejar los archivos soltados o seleccionados
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        });
 
-  function marcarConectado(id) {
-    const cliente = clientes.find(c => c.id === id);
-    if (!cliente) return;
-    cliente.conectado = true;
-    cliente.aviso = '';
-    localStorage.removeItem('clienteConectando');
-    localStorage.setItem('estado_' + id, 'conectado');
-    cargarClientes();
-  }
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
 
-  function crearCliente(cliente) {
-    const div = document.createElement('div');
-    div.className = 'cliente';
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            // Animación de estado (cargando)
+            statusPing.classList.remove('opacity-0');
+            statusDot.classList.replace('bg-slate-300', 'bg-blue-500');
 
-    const h2 = document.createElement('h2');
-    h2.textContent = `Cliente: ${cliente.nombre}`;
-    div.appendChild(h2);
+            Array.from(files).forEach(file => {
+                // Verificar que sea un archivo XML
+                if (file.type === "text/xml" || file.name.toLowerCase().endsWith('.xml')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => procesarXML(e.target.result);
+                    reader.readAsText(file);
+                }
+            });
 
-    const estado = document.createElement('p');
-    estado.classList.add('estado');
+            // Limpiar input para permitir subir el mismo archivo si es necesario
+            fileInput.value = '';
+            
+            // Detener animación poco después de procesar
+            setTimeout(() => {
+                statusPing.classList.add('opacity-0');
+            }, 1000);
+        }
 
-    const conectado = cliente.conectado || localStorage.getItem('estado_' + cliente.id) === 'conectado';
-    estado.textContent = conectado ? 'Estado: Conectado' : 'Estado: Desconectado';
-    estado.classList.add(conectado ? 'conectado' : 'desconectado');
-    div.appendChild(estado);
+        function procesarXML(xmlText) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
 
-    if (cliente.aviso && !conectado) {
-      const aviso = document.createElement('div');
-      aviso.className = 'aviso';
-      aviso.textContent = cliente.aviso;
-      div.appendChild(aviso);
+            // Función auxiliar robusta para buscar nodos sin importar los prefijos de namespaces
+            const getElement = (tagName) => {
+                let el = xmlDoc.getElementsByTagName('cfdi:' + tagName);
+                if (el.length === 0) el = xmlDoc.getElementsByTagName(tagName);
+                return el;
+            };
 
-      const btnPagar = document.createElement('button');
-      btnPagar.className = 'boton-pagar';
-      btnPagar.textContent = 'Pagar';
-      btnPagar.onclick = () => {
-        alert('Cobrando a tarjeta a nombre de Diego de Jesús...');
-        aviso.remove();
-        btnPagar.remove();
-        estado.textContent = 'Estado: Dado de baja';
-        estado.className = 'estado desconectado';
-      };
-      div.appendChild(btnPagar);
-    }
+            const comprobante = getElement('Comprobante')[0];
+            if (!comprobante) {
+                console.warn("No se encontró el nodo Comprobante. Probablemente no es un CFDI.");
+                return; 
+            }
 
-    const btnConectar = document.createElement('button');
-    btnConectar.className = 'boton-conectar';
-    btnConectar.textContent = conectado ? 'Conectado' : 'Conectar de nuevo';
-    btnConectar.disabled = conectado;
-    btnConectar.onclick = () => {
-      localStorage.setItem('clienteConectando', cliente.id);
-      window.location.href = 'https://remotedesktop.google.com/access/session/74f88d06-dcea-b3ee-b410-35d9ab213273';
-    };
-    div.appendChild(btnConectar);
+            const receptor = getElement('Receptor')[0];
+            
+            // Extraer datos generales
+            const data = {
+                fecha: comprobante.getAttribute('Fecha') ? comprobante.getAttribute('Fecha').split('T')[0] : 'N/A',
+                tipo: comprobante.getAttribute('TipoDeComprobante') || 'N/A',
+                cliente: receptor ? (receptor.getAttribute('Nombre') || receptor.getAttribute('Rfc') || 'Público en General') : 'N/A',
+                formaPago: comprobante.getAttribute('FormaPago') || 'N/A',
+                metodoPago: comprobante.getAttribute('MetodoPago') || 'N/A',
+                subTotal: formatMoneda(comprobante.getAttribute('SubTotal')),
+                total: formatMoneda(comprobante.getAttribute('Total')),
+                
+                // Impuestos (inicializados vacíos)
+                ivaTraslado: '-', 
+                ivaTasa: '',
+                iepsTraslado: '-', 
+                iepsTasa: '',
+                retIva: '-', 
+                retIsr: '-'
+            };
 
-    return div;
-  }
+            // Mapeo de tipos de comprobante para interfaz gráfica
+            const tipoMap = {
+                'I': 'Ingreso',
+                'E': 'Egreso',
+                'P': 'Pago',
+                'N': 'Nómina',
+                'T': 'Traslado'
+            };
+            data.tipoNombre = tipoMap[data.tipo] || data.tipo;
 
-  function cargarClientes() {
-    const panel = document.getElementById('panel-clientes');
-    panel.innerHTML = '';
-    clientes.forEach(cliente => {
-      panel.appendChild(crearCliente(cliente));
-    });
-  }
+            // Extraer Impuestos Globales
+            const impuestosNodes = getElement('Impuestos');
+            let globalImpuestos = null;
+            
+            // Buscar el nodo Impuestos principal (hijo directo de Comprobante) para evitar impuestos a nivel concepto
+            for(let i=0; i<impuestosNodes.length; i++) {
+                if(impuestosNodes[i].parentNode.nodeName.includes('Comprobante')) {
+                    globalImpuestos = impuestosNodes[i];
+                    break;
+                }
+            }
 
-  window.addEventListener('load', () => {
-    if (clienteConectando) {
-      marcarConectado(clienteConectando);
-    } else {
-      cargarClientes();
-    }
-  });
-</script>
+            if (globalImpuestos) {
+                // Catálogos SAT: 001=ISR, 002=IVA, 003=IEPS
+                
+                // 1. Extraer TRASLADOS (IVA, IEPS)
+                const traslados = globalImpuestos.getElementsByTagName('cfdi:Traslado').length > 0 
+                    ? globalImpuestos.getElementsByTagName('cfdi:Traslado') 
+                    : globalImpuestos.getElementsByTagName('Traslado');
+                    
+                for(let i=0; i<traslados.length; i++) {
+                    const t = traslados[i];
+                    const imp = t.getAttribute('Impuesto');
+                    const importe = t.getAttribute('Importe');
+                    const tasa = t.getAttribute('TasaOCuota') || t.getAttribute('Tasa');
+                    
+                    if (imp === '002' || imp === 'IVA') {
+                        data.ivaTraslado = formatMoneda(importe);
+                        if (tasa) data.ivaTasa = `${(parseFloat(tasa)*100).toFixed(0)}%`; // Formato 16%
+                    } else if (imp === '003' || imp === 'IEPS') {
+                        data.iepsTraslado = formatMoneda(importe);
+                        // El IEPS puede tener decimales (ej. 8% o 26.5%)
+                        if (tasa) data.iepsTasa = `${(parseFloat(tasa)*100).toFixed(2).replace(/\.00$/, '')}%`;
+                    }
+                }
 
+                // 2. Extraer RETENCIONES (ISR, IVA)
+                const retenciones = globalImpuestos.getElementsByTagName('cfdi:Retencion').length > 0 
+                    ? globalImpuestos.getElementsByTagName('cfdi:Retencion') 
+                    : globalImpuestos.getElementsByTagName('Retencion');
+
+                for(let i=0; i<retenciones.length; i++) {
+                    const r = retenciones[i];
+                    const imp = r.getAttribute('Impuesto');
+                    const importe = r.getAttribute('Importe');
+                    
+                    if (imp === '001' || imp === 'ISR') {
+                        data.retIsr = formatMoneda(importe);
+                    } else if (imp === '002' || imp === 'IVA') {
+                        data.retIva = formatMoneda(importe);
+                    }
+                }
+            }
+
+            agregarFilaTabla(data);
+        }
+
+        function agregarFilaTabla(data) {
+            // Ocultar estado vacío en la primera inserción
+            if (facturasProcesadas === 0) {
+                emptyState.style.display = 'none';
+            }
+
+            const row = document.createElement('tr');
+            row.className = "hover:bg-slate-50 transition-colors group";
+            
+            // Helpers de renderizado para UI más limpia
+            const renderMonto = (monto) => monto === '-' 
+                ? '<span class="text-slate-300">-</span>' 
+                : `<span class="font-medium text-slate-700">${monto}</span>`;
+            
+            const renderBadge = (valor, colorClass) => valor 
+                ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${colorClass}">${valor}</span>` 
+                : '<span class="text-slate-300">-</span>';
+
+            // Determinar color del tipo de comprobante
+            let tipoClase = 'bg-slate-100 text-slate-700';
+            if (data.tipo === 'I') tipoClase = 'bg-emerald-100 text-emerald-800';
+            if (data.tipo === 'E') tipoClase = 'bg-rose-100 text-rose-800';
+
+            row.innerHTML = `
+                <td class="px-4 py-3 text-slate-600">${data.fecha}</td>
+                <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${tipoClase}">
+                        ${data.tipoNombre}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-slate-800 font-medium truncate max-w-[250px]" title="${data.cliente}">
+                    ${data.cliente}
+                </td>
+                <td class="px-4 py-3 text-slate-600">${data.formaPago}</td>
+                <td class="px-4 py-3 text-slate-600">${data.metodoPago}</td>
+                <td class="px-4 py-3 text-right font-medium text-slate-700">${data.subTotal}</td>
+                
+                <!-- IVA (Monto e Insignia) -->
+                <td class="px-4 py-3 text-right bg-blue-50/30 group-hover:bg-blue-50/60">${renderMonto(data.ivaTraslado)}</td>
+                <td class="px-4 py-3 text-center bg-blue-50/30 group-hover:bg-blue-50/60">${renderBadge(data.ivaTasa, 'bg-blue-100 text-blue-700')}</td>
+                
+                <!-- IEPS (Monto e Insignia) -->
+                <td class="px-4 py-3 text-right bg-purple-50/30 group-hover:bg-purple-50/60">${renderMonto(data.iepsTraslado)}</td>
+                <td class="px-4 py-3 text-center bg-purple-50/30 group-hover:bg-purple-50/60">${renderBadge(data.iepsTasa, 'bg-purple-100 text-purple-700')}</td>
+                
+                <!-- Retenciones -->
+                <td class="px-4 py-3 text-right text-rose-600">${renderMonto(data.retIva)}</td>
+                <td class="px-4 py-3 text-right text-rose-600">${renderMonto(data.retIsr)}</td>
+                
+                <!-- Total -->
+                <td class="px-4 py-3 text-right font-bold text-slate-900 bg-emerald-50/30">${data.total}</td>
+            `;
+
+            tableBody.appendChild(row);
+            
+            // Actualizar contadores
+            facturasProcesadas++;
+            counterText.innerText = `${facturasProcesadas} factura${facturasProcesadas > 1 ? 's' : ''} procesada${facturasProcesadas > 1 ? 's' : ''}`;
+        }
+
+        function formatMoneda(valor) {
+            if (!valor || isNaN(valor)) return '$0.00';
+            const num = parseFloat(valor);
+            return new Intl.NumberFormat('es-MX', { 
+                style: 'currency', 
+                currency: 'MXN' 
+            }).format(num);
+        }
+
+        function limpiarTabla() {
+            tableBody.innerHTML = '';
+            tableBody.appendChild(emptyState);
+            emptyState.style.display = 'table-row';
+            facturasProcesadas = 0;
+            counterText.innerText = '0 facturas procesadas';
+            statusDot.classList.replace('bg-blue-500', 'bg-slate-300');
+        }
+
+        function exportarCSV() {
+            if (facturasProcesadas === 0) return;
+            
+            // Cabeceras exactas a las columnas
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF fuerza UTF-8 en Excel
+            csvContent += "Fecha,Tipo,Cliente,Forma de Pago,Metodo de Pago,Subtotal,IVA Traslado,% IVA,IEPS Traslado,% IEPS,Retencion IVA,Retencion ISR,Total\n";
+            
+            const rows = tableBody.querySelectorAll('tr:not(#emptyState)');
+            rows.forEach(row => {
+                const cols = row.querySelectorAll('td');
+                const rowData = Array.from(cols).map(col => {
+                    // Limpiar saltos de linea y quitar comas para no romper el CSV
+                    let text = col.innerText.replace(/\n/g, ' ').replace(/,/g, '').trim();
+                    // Si está vacío (el guion), poner vacio
+                    if(text === '-') text = '';
+                    return `"${text}"`; // Envolver en comillas por seguridad
+                });
+                csvContent += rowData.join(",") + "\n";
+            });
+
+            // Trigger descarga
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "reporte_cfdi_contable.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
-
-
-
 

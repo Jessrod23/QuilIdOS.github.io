@@ -77,12 +77,19 @@
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-xs font-semibold sticky top-0">
                         <tr>
+                            <th class="px-4 py-4 min-w-[120px]">UUID</th>
                             <th class="px-4 py-4 min-w-[100px]">Fecha</th>
                             <th class="px-4 py-4 min-w-[80px]">Tipo</th>
-                            <th class="px-4 py-4 min-w-[200px]">Cliente (Receptor)</th>
+                            <th class="px-4 py-4 min-w-[120px]">RFC Emisor</th>
+                            <th class="px-4 py-4 min-w-[200px]">Razón Social Emisor</th>
+                            <th class="px-4 py-4 min-w-[120px]">RFC Receptor</th>
+                            <th class="px-4 py-4 min-w-[200px]">Razón Social Receptor</th>
                             <th class="px-4 py-4 min-w-[120px]">F. Pago</th>
                             <th class="px-4 py-4 min-w-[120px]">M. Pago</th>
                             <th class="px-4 py-4 min-w-[120px] text-right">Subtotal</th>
+                            
+                            <!-- Descuento añadido aquí -->
+                            <th class="px-4 py-4 min-w-[120px] text-right text-orange-600/80">Descuento</th>
                             
                             <!-- Impuestos trasladados con sus porcentajes AL LADO -->
                             <th class="px-4 py-4 min-w-[120px] text-right bg-blue-50/50">IVA Traslado</th>
@@ -100,7 +107,8 @@
                     <tbody id="tableBody" class="divide-y divide-slate-100">
                         <!-- Estado vacío -->
                         <tr id="emptyState">
-                            <td colspan="13" class="px-4 py-16 text-center">
+                            <!-- colspan aumentado a 18 por la nueva columna -->
+                            <td colspan="18" class="px-4 py-16 text-center">
                                 <div class="flex flex-col items-center justify-center text-slate-400">
                                     <svg class="w-12 h-12 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                     <p class="text-base font-medium text-slate-500">No hay datos registrados</p>
@@ -204,6 +212,7 @@
             // Función auxiliar robusta para buscar nodos sin importar los prefijos de namespaces
             const getElement = (tagName) => {
                 let el = xmlDoc.getElementsByTagName('cfdi:' + tagName);
+                if (el.length === 0) el = xmlDoc.getElementsByTagName('tfd:' + tagName);
                 if (el.length === 0) el = xmlDoc.getElementsByTagName(tagName);
                 return el;
             };
@@ -214,16 +223,24 @@
                 return; 
             }
 
+            const emisor = getElement('Emisor')[0];
             const receptor = getElement('Receptor')[0];
+            const timbre = getElement('TimbreFiscalDigital')[0];
+            const descuentoAttr = comprobante.getAttribute('Descuento');
             
             // Extraer datos generales
             const data = {
+                uuid: timbre ? (timbre.getAttribute('UUID') || 'S/N') : 'S/N',
                 fecha: comprobante.getAttribute('Fecha') ? comprobante.getAttribute('Fecha').split('T')[0] : 'N/A',
                 tipo: comprobante.getAttribute('TipoDeComprobante') || 'N/A',
-                cliente: receptor ? (receptor.getAttribute('Nombre') || receptor.getAttribute('Rfc') || 'Público en General') : 'N/A',
+                rfcEmisor: emisor ? (emisor.getAttribute('Rfc') || 'N/A') : 'N/A',
+                nombreEmisor: emisor ? (emisor.getAttribute('Nombre') || 'N/A') : 'N/A',
+                rfcReceptor: receptor ? (receptor.getAttribute('Rfc') || 'N/A') : 'N/A',
+                nombreReceptor: receptor ? (receptor.getAttribute('Nombre') || 'Público en General') : 'N/A',
                 formaPago: comprobante.getAttribute('FormaPago') || 'N/A',
                 metodoPago: comprobante.getAttribute('MetodoPago') || 'N/A',
                 subTotal: formatMoneda(comprobante.getAttribute('SubTotal')),
+                descuento: descuentoAttr ? formatMoneda(descuentoAttr) : '-',
                 total: formatMoneda(comprobante.getAttribute('Total')),
                 
                 // Impuestos (inicializados vacíos)
@@ -326,18 +343,27 @@
             if (data.tipo === 'E') tipoClase = 'bg-rose-100 text-rose-800';
 
             row.innerHTML = `
+                <td class="px-4 py-3 text-slate-500 font-mono text-xs truncate max-w-[120px]" title="${data.uuid}">${data.uuid}</td>
                 <td class="px-4 py-3 text-slate-600">${data.fecha}</td>
                 <td class="px-4 py-3">
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${tipoClase}">
                         ${data.tipoNombre}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-slate-800 font-medium truncate max-w-[250px]" title="${data.cliente}">
-                    ${data.cliente}
+                <td class="px-4 py-3 text-slate-600 font-mono text-xs">${data.rfcEmisor}</td>
+                <td class="px-4 py-3 text-slate-800 font-medium truncate max-w-[200px]" title="${data.nombreEmisor}">
+                    ${data.nombreEmisor}
+                </td>
+                <td class="px-4 py-3 text-slate-600 font-mono text-xs">${data.rfcReceptor}</td>
+                <td class="px-4 py-3 text-slate-800 font-medium truncate max-w-[200px]" title="${data.nombreReceptor}">
+                    ${data.nombreReceptor}
                 </td>
                 <td class="px-4 py-3 text-slate-600">${data.formaPago}</td>
                 <td class="px-4 py-3 text-slate-600">${data.metodoPago}</td>
                 <td class="px-4 py-3 text-right font-medium text-slate-700">${data.subTotal}</td>
+                
+                <!-- Descuento -->
+                <td class="px-4 py-3 text-right text-orange-600 font-medium">${renderMonto(data.descuento)}</td>
                 
                 <!-- IVA (Monto e Insignia) -->
                 <td class="px-4 py-3 text-right bg-blue-50/30 group-hover:bg-blue-50/60">${renderMonto(data.ivaTraslado)}</td>
@@ -385,7 +411,7 @@
             
             // Cabeceras exactas a las columnas
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF fuerza UTF-8 en Excel
-            csvContent += "Fecha,Tipo,Cliente,Forma de Pago,Metodo de Pago,Subtotal,IVA Traslado,% IVA,IEPS Traslado,% IEPS,Retencion IVA,Retencion ISR,Total\n";
+            csvContent += "UUID,Fecha,Tipo,RFC Emisor,Razón Social Emisor,RFC Receptor,Razón Social Receptor,Forma de Pago,Metodo de Pago,Subtotal,Descuento,IVA Traslado,% IVA,IEPS Traslado,% IEPS,Retencion IVA,Retencion ISR,Total\n";
             
             const rows = tableBody.querySelectorAll('tr:not(#emptyState)');
             rows.forEach(row => {
@@ -412,4 +438,3 @@
     </script>
 </body>
 </html>
-
